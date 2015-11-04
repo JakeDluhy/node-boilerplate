@@ -1,0 +1,93 @@
+.header-wrapper {
+  position: relative;
+  .mui-appbar {
+    margin-top: -68px;
+    @media only screen and (min-device-width: 320px) and (max-device-width: 800px) {
+      margin-top: -48px;
+      height: 48px;
+      min-height: 48px;
+    }
+    background-color: $primary-color;
+    box-shadow: 0 4px 2px -2px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    width: 100%;
+    z-index: 50;
+    .appname-container {
+      @media only screen and (min-device-width: 320px) and (max-device-width: 800px) {
+        display: none;
+      }
+      float: left;
+      padding: 0 15px;
+      &:hover {
+        background-color: $primary-hover;
+      }
+      h1 {
+        margin: 0.5em 0;
+        text-decoration: none;
+        a {
+          color: $light-text;
+          &:hover {
+            text-decoration: none;
+          }
+        }
+      }
+    }
+    .navigation-container {
+      @media only screen and (min-device-width: 320px) and (max-device-width: 800px) {
+        display: none;
+      }
+      float: right;
+      h3 {
+        display: inline-block;
+        color: $light-text;
+        cursor: pointer;
+        height: 68px;
+        padding: 20px;
+        margin: 0;
+        &:hover {
+          background-color: $primary-hover;
+        }
+      }
+    }
+    .icon-mobile-nav {
+      display: none;
+      @media only screen and (min-device-width: 320px) and (max-device-width: 800px) {
+        display: block;
+      }
+
+      height: 100%;
+      table {
+        height: 100%;
+        table-layout: fixed;
+        width: 100%;
+        tbody {
+          width: 100%;
+          td {
+            width: 25%;
+            height: 100%;
+            text-align: center;
+            &.active-button:active {
+              background-color: $primary-hover;
+            }
+            i {
+              font-size: 1.8em;
+            }
+            div {
+              font-size: 0.8em;
+            }
+          }
+        }
+      }
+      
+    }
+  }
+}
+
+.header-text {
+  display: inline-block;
+  color: $light-text;
+  &:hover {
+    text-decoration: none;
+    color: $light-text;
+  }
+}

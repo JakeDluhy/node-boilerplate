@@ -1,0 +1,29 @@
+.auth-form {
+  overflow: hidden;
+}
+.mailing-list-checkbox {
+  float: left;
+}
+
+.form-errors {
+  font-size: 0.8em;
+  position: absolute;
+  top: 4px;
+  color: $form-error-color;
+}
+
+.input-errors {
+  border-color: $form-error-color;
+  border-width: 2px;
+  color: $form-error-color;
+  &:focus {
+    color: $dark-text;
+  }
+}
+
+.mui-btn.disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.60;
+  box-shadow: none;
+}

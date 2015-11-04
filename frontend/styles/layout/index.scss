@@ -1,0 +1,124 @@
+.index-wrapper {
+  height: 100%;
+}
+.seventy-text-wrapper {
+  width: 70%;
+  @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+    width: 90%;
+  }
+  margin: 0 auto;
+}
+.welcome-banner {
+  background: url('../img/splash-image.jpg');
+  background-position: center center;
+  @include calc(height, "100% - 100px");
+  position: relative;
+  .opacity-shield {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+  }
+  .welcome-container {
+    width: 460px;
+    @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+      width: 300px;
+    }
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    h1, h3 {
+      color: $light-text;
+      margin: 5px 0 10px;
+    }
+  }
+}
+.icons-banner {
+  .icon-wrapper {
+    height: 250px;
+    position: relative;
+    .icon-container {
+      position: absolute;
+      left: 50%;
+      top: 25%;
+      transform: translateX(-50%);
+      i {
+        font-size: 6em;
+        color: $dark-text;
+      }
+    }
+    .icon-description {
+      margin-top: 180px;
+      .description {
+        text-align: center;
+        text-transform: uppercase;
+        color: $dark-text;
+      }
+    }
+  }
+}
+.about-banner {
+  background-color: $highlight-color;
+  padding: 50px;
+  @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+    padding: 15px;
+  }
+  
+  .build-wrapper {
+    width: 170px;
+    margin: 0 auto;
+  }
+}
+.email-signup-banner {
+  padding: 50px 0;
+  @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+    padding: 25px 0;
+  }
+  .mailinglist-wrapper {
+    width: 70%;
+    @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+      width: 90%;
+    }
+    margin: 0 auto;
+
+    .mailinglist-container {
+      .mui-form-group {
+        margin: 0 auto;
+        width: 50%;
+        input {
+          text-align: center;
+          color: $dark-text;
+        }
+        //TODO: Make React component
+      }
+      @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+        .mui-form-group {
+          width: 90%;
+        }
+      }
+    }
+    .btn-container {
+        width: 200px;
+        height: 80px;
+        margin: 0 auto;
+        position: relative;
+        padding: 12px 0;
+        .mui-btn {
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+      }
+  }
+}
+.footer-banner {
+  padding: 20px 0;
+  background-color: $primary-color;
+  .copyright-container {
+    color: $light-text;
+  }
+}

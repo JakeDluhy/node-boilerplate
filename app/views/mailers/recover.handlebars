@@ -590,13 +590,13 @@
                 Hey there {{verification.firstName}}
               </p>
               <p style="margin: 10px 0;padding: 0;mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;color: #202020;font-family: Helvetica;font-size: 16px;line-height: 24px;text-align: left;">
-                We've reset your password for you.
+                We heard that you've forgotten your password and need to reset it! We've set up a place for you to do that.
               </p>
               <p style="margin: 10px 0;padding: 0;mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;color: #202020;font-family: Helvetica;font-size: 16px;line-height: 24px;text-align: left;">
-                The new one is {{verification.password}}
+                Please visit <a href="{{verification.resetLink}}">{{verification.resetLink}}</a> to complete the process. This code will expire in an hour, so get on it right away!
               </p>
               <p style="margin: 10px 0;padding: 0;mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;color: #202020;font-family: Helvetica;font-size: 16px;line-height: 24px;text-align: left;">
-                Please log in as soon as possible and change it to something a little bit more memorable!
+                If you didn't request to reset your password, please contact {{verification.contactEmail}} immediately.
               </p>
 
             </td>

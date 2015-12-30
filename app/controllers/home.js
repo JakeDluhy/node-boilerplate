@@ -1,76 +1,190 @@
+/*
+  IMPORT PACKAGES
+*/
 var passport = require('passport');
 var jwt = require('jsonwebtoken');
 var _ = require('lodash');
+
+/*
+  ENVIRONMENT CONFIG
+*/
 var env = require('../../config/environments/' + process.env.NODE_ENV);
-var ContactMailer = require('../mailers/contact-mailer');
 var contactEmail = env.nodemailer.username;
+var jwtSecret = env.jwtSecret;
+
+/*
+  EXTERNAL MODULES
+*/
+var ContactMailer = require('../mailers/contact-mailer');
+var Checkit = require('../../config/checkit');
+
+/*
+  MODELS
+*/
 var User = require('../models/user');
 
+/*
+  HOME CONTROLLER
+*/
 module.exports = {
+  /*
+    @action GET index
+    Responds to generic routes by serving the html
+
+    @if req.session.context is defined, it passes the context to the handlebars renderer
+        this allows the app to send data with the index template
+  */
   index: function(req, res) {
     var context = (req.session.context === undefined ? {} : req.session.context);
     res.render('layouts/index', context);
     req.session.context = undefined;
   },
+
+  /*
+    @action POST login
+    The endpoint that is hit after the passport middleware
+
+    @param {object} req - will contain the key user
+                          user will either be the user object, or an error hash of the form
+                          {
+                            errors: {type: {string}, error: {string}}
+                          }
+
+    @responds with {
+                      meta: {token: {token}, user: {object}}
+                    }
+  */
   login: function(req, res) {
     if(!req.user) {
-      return res.json({error: 'There was a problem logging in to your account'});
+      return res.status(401).json({ errors: {error: 'There was a problem logging in to your account'} });
     }
     if(req.user.errorType !== undefined) {
-      res.json(req.user);
+      res.status(401).json({ errors: req.user });
     } else {
-      var token = jwt.sign(req.user, env.jwtSecret);
-      res.json({token: token});
+      var token = jwt.sign(req.user, jwtSecret);
+      res.json({ meta: {token: token, user: _.omit(req.user, 'password')} });
     }
   },
+
+  /*
+    @action POST register
+    Register a new user
+
+    @param {object} req - will contain the user resource to create in the body
+    {
+      data: {
+        type: 'user',
+        attributes: {
+          {attributes}
+        }
+      }
+    }
+
+    @responds with {
+                      meta: {success: {string}}
+                    }
+  */
   register: function(req, res) {
-    if(!req.body || !req.body.user) {
+    if(!req.body || !req.body.data || !req.body.data.attributes) {
       console.log('User not sent with the registration request');
-      return res.json({error: 'Error registering an account'});
+      return res.status(401).json({ errors: {error: 'Error registering an account'} });
     }
 
-    User.register(this._permittedRegisterParams(req.body.user))
+    User.register(privateMethods._permittedRegisterParams(req.body.data.attributes))
     .then(function(user) {
-      res.json({success: "Congrats, you're in! Just verify your email and you're good to go!"});
+      res.status(201).json({ meta: {success: "Congrats, you're in! Once you verify your email you'll be good to go!"} });
     })
     .catch(function(err) {
-      res.json({error: err});
+      console.log(err.message);
+      res.status(401).json({ errors: {error: err.message} });
     })
   },
+
+  /*
+    @action POST registerForMailingList
+    Register an email for the mailing list
+
+    @param {object} req - will contain the user resource with only an email
+    {
+      data: {
+        type: 'user',
+        attributes: {
+          email: {string}
+        }
+      }
+    }
+
+    @responds with {
+                      meta: {success: {string}}
+                    }
+  */
   registerForMailingList: function(req, res) {
-    if(!req.body || !req.body.email) {
+    if(!req.body || !req.body.data || !req.body.data.attributes || !req.body.data.attributes.email) {
       console.log('Email not sent when registering for mailing list');
-      return res.json({error: 'Error signing up for the mailing list'});
+      return res.status(401).json({ errors: {error: 'Error signing up for the mailing list'} });
     }
 
-    User.registerForMailingList(req.body.email)
+    User.registerForMailingList(req.body.data.attributes.email)
     .then(function(data) {
-      res.json({success: "Congratulations! You're all signed up!"});
+      res.status(201).json({ meta: {success: "Congratulations! You're all signed up!"} });
+    })
+    .catch(Checkit.Error, function(err) {
+      res.status(401).json({ errors: {error: "That email has already been registered"} });
     })
     .catch(function(err) {
-      console.log(err);
-      res.json({error: "Unable to sign up for mailing list. Please contact support"});
+      res.status(401).json({ errors: {error: "Unable to sign up for mailing list. Please contact support"} });
     })
   },
-  sendContactForm: function(req, res) {
-    if(!req.body || !req.body.contact) {
-      console.log('Contact information not provided with contact request');
-      return res.json({error: 'Error contacting us, please directly email ' + contactEmail});
+
+  /*
+    @action POST sendContactForm
+    Send the contact form to the environment contact email
+
+    @param {object} req - will contain the contact resource to create in the body
+    {
+      data: {
+        type: 'contact',
+        attributes: {
+          name: {string},
+          contactType: {string},
+          email: {string},
+          content: {string}
+        }
+      }
     }
 
-    var reqContact = req.body.contact;
-    ContactMailer.sendContactForm({name: reqContact.name, subject: reqContact.contactType, fromEmail: reqContact.email, content: reqContact.content})
+    @responds with {
+                      meta: {success: {string}}
+                    }
+  */
+  sendContactForm: function(req, res) {
+    if(!req.body || !req.body.data || !req.body.data.attributes) {
+      console.log('Contact information not provided with contact request');
+      return res.status(400).json({ errors: {error: 'Error contacting us, please directly email ' + contactEmail} });
+    }
+
+    var reqContact = req.body.data.attributes;
+    ContactMailer.sendContactForm({name: reqContact.name, subject: reqContact.contactType, fromEmail: reqContact.fromEmail, content: reqContact.content})
     .then(function() {
-      res.json({success: "Got it - We'll get back to you soon!"});
+      res.status(200).json({ meta: {success: "Got it - We'll get back to you soon!"} });
     })
     .catch(function(err) {
       console.log(err);
-      res.json({error: err[0]});
-    })
+      res.status(400).json({ errors: {error: err[0]} });
+    });
   },
-
-  // PRIVATE
-    _permittedRegisterParams: function(attrs) {
-      return _.pick(attrs, 'firstName', 'lastName', 'email', 'password', 'mailingList');
-    },
 };
+
+// PRIVATE
+var privateMethods = {
+  /*
+    @object _permittedRegisterParams
+    @private
+
+    @params {object} attrs - the request attributes
+    @returns {object} the filtered attributes
+  */
+  _permittedRegisterParams: function(attrs) {
+    return _.pick(attrs, 'firstName', 'lastName', 'email', 'password', 'mailingList');
+  }
+}

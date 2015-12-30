@@ -8,7 +8,7 @@ exports.up = function(knex, Promise) {
     table.integer('active').defaultTo(0);
     table.boolean('mailing_list');
     table.timestamps();
-  })
+  });
 };
 
 exports.down = function(knex, Promise) {

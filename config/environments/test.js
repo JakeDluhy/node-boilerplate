@@ -3,9 +3,9 @@ module.exports = {
   rootUrl: 'http://localhost:3300',
   database: {
     host: '127.0.0.1',
-    user: 'username',
+    user: 'jake',//username
     password: '',
-    database: 'my_test_db'
+    database: 'warscribe_test_db'//my_test_db
   },
   jwtSecret: 'mysecrethere',
   sessionSecret: 'mysecrethere',

@@ -1,28 +1,48 @@
 var PATH_TO_ROOT = '../../..';
 
+/*
+  IMPORT PACKAGES
+*/
 var Promise = require('bluebird');
-
 var sinon = require('sinon');
-
 var factory = require('factory-girl').promisify(Promise);
 require('factory-girl-bookshelf')();
-require('../factories/user');
-
-var assert = require('chai').assert;
-var expect = require('chai').expect;
-var should = require('chai').should();
 var request = require('supertest');
 var jwt = require('jsonwebtoken');
 var jwtDecode = require('jwt-decode');
 
-var app = require(PATH_TO_ROOT+'/config/setup-app');
+/*
+  IMPORT TEST HELPERS
+*/
+var assert = require('chai').assert;
+var expect = require('chai').expect;
+var should = require('chai').should();
+
+/*
+  ENVIRONMENT CONFIG
+*/
 var env = require(PATH_TO_ROOT+'/config/environments/' + process.env.NODE_ENV);
-var UsersController = require(PATH_TO_ROOT+'/app/controllers/users');
+
+/*
+  EXTERNAL MODULES
+*/
+var app = require(PATH_TO_ROOT+'/config/setup-app');
+require('../factories/user');
+var mailer = require(PATH_TO_ROOT+'/config/nodemailer');
+
+/*
+  MODELS
+*/
 var User = require(PATH_TO_ROOT+'/app/models/user');
+var PasswordReset = require(PATH_TO_ROOT+'/app/models/password-reset');
+
+/*
+  CONTROLLERS
+*/
+var UsersController = require(PATH_TO_ROOT+'/app/controllers/users');
 
 
-// var UsersControllerStub = {};
-// var UsersController = proxyquire('../../app/controllers/users', { 'path': UsersControllerStub});
+
 function createJwtToken() {
   var user = {
     firstName: 'Jake',
@@ -35,6 +55,7 @@ function createJwtToken() {
 
 function getResponseObject(cb) {
   return {
+    status: function() { return this; },
     json: cb
   }
 }
@@ -46,6 +67,9 @@ function factoryCleanup(done) {
   });
 }
 
+/*
+  USERS CONTROLLER TEST
+*/
 describe('Users Controller', function() {
   describe('Users UPDATE', function() {
     it('should call the users#update on a request', function(done) {
@@ -54,7 +78,7 @@ describe('Users Controller', function() {
       .put('/api/users/1')
       .set('Authorization', 'Bearer ' + jwt)
       .end(function(err, res) {
-        expect(res.body.error).to.equal('Error saving profile changes');
+        expect(res.body.errors.error).to.equal('Error saving profile changes');
         done();
       });
     });
@@ -71,7 +95,7 @@ describe('Users Controller', function() {
     it('should respond with an error when no user is provided', function(done) {
       var req = {};
       var res = getResponseObject(function(data) {
-        expect(data.error).to.equal('Error saving profile changes');
+        expect(data.errors.error).to.equal('Error saving profile changes');
         done();
       });
 
@@ -81,15 +105,20 @@ describe('Users Controller', function() {
     it('should respond with an error when a non existent user is provided', function(done) {
       var req = {
         body: {
-          user: {
-            id: 123212343,
-            firstName: 'Foo',
-            lastName: 'Bar'
+          data: {
+            type: 'user',
+            id: 12312,
+            attributes: {
+              firstName: 'Foo',
+              lastName: 'Bar'
+            }
           }
-        }
+        },
+        user: { id: 12312 },
+        params: { id: 12312 }
       };
       var res = getResponseObject(function(data) {
-        expect(data.error).to.equal('Error saving profile changes');
+        expect(data.errors.error).to.equal('Error saving profile changes');
         done();
       });
 
@@ -101,19 +130,24 @@ describe('Users Controller', function() {
       .then(function(user) {
         var num = Math.random()*100001|0;
         var req = {
-          body:{ user: {
+          body: { data: {
+            type: 'user',
             id: user.get('id'),
-            firstName: 'The New Guy'+num,
-            lastName: 'The III'+num,
-            email: 'thenewguy'+num+'@test.com'
-          }}
+            attributes: {
+              firstName: 'The New Guy'+num,
+              lastName: 'The III'+num,
+              email: 'thenewguy'+num+'@test.com'
+            }
+          } },
+          user: { id: user.get('id') },
+          params: { id: user.get('id') }
         };
         var res = getResponseObject(function(data) {
-          var responseUser = jwtDecode(data.token);
-          expect(responseUser.firstName).to.equal(req.body.user.firstName);
-          expect(responseUser.lastName).to.equal(req.body.user.lastName);
-          expect(responseUser.email).to.equal(req.body.user.email);
-          expect(data.token).to.not.be.undefined;
+          var responseUser = jwtDecode(data.meta.token);
+          expect(responseUser.firstName).to.equal(req.body.data.attributes.firstName);
+          expect(responseUser.lastName).to.equal(req.body.data.attributes.lastName);
+          expect(responseUser.email).to.equal(req.body.data.attributes.email);
+          expect(data.meta.token).to.not.be.undefined;
           
           factoryCleanup(done);
         });
@@ -122,20 +156,45 @@ describe('Users Controller', function() {
       });
     });
 
+    it('should respond with an error if the user to update is not the current user', function(done) {
+      var req = {
+        body: { data: {
+          type: 'user',
+          id: 123212343,
+          attributes: {
+            firstName: 'Foo',
+            lastName: 'Bar',
+            email: 'myemail@test.com'
+          }
+        } },
+        user: { id: 123123 },
+        params: { id: 123212343 }
+      };
+      var res = getResponseObject(function(data) {
+        expect(data.errors.error).to.equal('Not authorized to edit that account');
+        done();
+      });
+
+      UsersController.update(req, res);
+    });
+
     it('should not update user password', function(done) {
       factory.create('user')
       .then(function(user) {
         var req = {
-          body:{ user: {
+          body:{ data: {
+            type: 'user',
             id: user.get('id'),
-            password: 'foobarchoo2'
-          }}
+            attributes: { password: 'foobarchoo2' }
+          } },
+          user: { id: user.get('id') },
+          params: { id: user.get('id') }
         };
         var res = getResponseObject(function(data) {
-          var responseUser = jwtDecode(data.token);
-          expect(responseUser.password).to.not.equal(req.body.user.password);
+          var responseUser = jwtDecode(data.meta.token);
+          expect(responseUser.password).to.not.equal(req.body.data.attributes.password);
           expect(responseUser.password).to.equal('foobarchoo');
-          expect(data.token).to.not.be.undefined;
+          expect(data.meta.token).to.not.be.undefined;
           
           factoryCleanup(done);
         });
@@ -152,7 +211,7 @@ describe('Users Controller', function() {
       .put('/api/users/1/change_password')
       .set('Authorization', 'Bearer ' + jwt)
       .end(function(err, res) {
-        expect(res.body.error).to.equal('Error changing password');
+        expect(res.body.errors.error).to.equal('Error changing password');
         done();
       });
     });
@@ -169,7 +228,27 @@ describe('Users Controller', function() {
     it('should respond with an error when no user is provided', function(done) {
       var req = {};
       var res = getResponseObject(function(data) {
-        expect(data.error).to.equal('Error changing password');
+        expect(data.errors.error).to.equal('Error changing password');
+        done();
+      });
+
+      UsersController.changePassword(req, res);
+    });
+
+    it('should respond with an error when the current user trys to change someone elses password', function(done) {
+      var req = {
+        body: { data: {
+          type: 'user',
+          id: 123212343,
+          attributes: {
+            firstName: 'Foo',
+            lastName: 'Bar'
+          }
+        } },
+        user: { id: 121312 }
+      };
+      var res = getResponseObject(function(data) {
+        expect(data.errors.error).to.equal('Only a user can update their own password');
         done();
       });
 
@@ -179,15 +258,19 @@ describe('Users Controller', function() {
     it('should respond with an error when a non existent user is provided', function(done) {
       var req = {
         body: {
-          user: {
+          data: {
+            type: 'user',
             id: 123212343,
-            firstName: 'Foo',
-            lastName: 'Bar'
+            attributes: {
+              firstName: 'Foo',
+              lastName: 'Bar'
+            }
           }
-        }
+        },
+        user: { id: 123212343 }
       };
       var res = getResponseObject(function(data) {
-        expect(data.error).to.equal('Error changing password');
+        expect(data.errors.error).to.equal('Error changing password');
         done();
       });
 
@@ -196,7 +279,7 @@ describe('Users Controller', function() {
 
     it('should update the user password', function(done) {
       var res = getResponseObject(function(data) {
-        expect(data.token).to.not.be.undefined;
+        expect(data.meta.token).to.not.be.undefined;
         
         factoryCleanup(done);
       });
@@ -204,11 +287,15 @@ describe('Users Controller', function() {
       factory.withOptions({hashPass: true}).create('user')
       .then(function(user) {
         var req = {
-          body:{ user: {
+          body: { data: {
+            type: 'user',
             id: user.get('id'),
-            oldPassword: 'foobarchoo',
-            newPassword: 'foobarchoo2'
-          }}
+            attributes: {
+              oldPassword: 'foobarchoo',
+              newPassword: 'foobarchoo2'  
+            }
+          } },
+          user: { id: user.get('id') }
         };
 
         UsersController.changePassword(req, res);
@@ -230,12 +317,12 @@ describe('Users Controller', function() {
       factory.create('user')
       .then(function(user) {
         var req = {
-          params: { id: 23453453 },
+          params: { id: user.get('id')+1 },
           session: {}
         };
         var res = {
           redirect: function(redirectPath) {
-            expect(req.session.context.error).to.equal("There was an error verifying your account. Please reach out to us with your situation!");
+            expect(req.session.context.errors.error).to.equal("There was an error verifying your account. Please reach out to us with your situation!");
 
             factoryCleanup(done);
           }
@@ -255,7 +342,7 @@ describe('Users Controller', function() {
         };
         var res = {
           redirect: function(redirectPath) {
-            expect(req.session.context.error).to.equal("There was an error verifying your account. Please reach out to us with your situation!");
+            expect(req.session.context.errors.error).to.equal("There was an error verifying your account. Please reach out to us with your situation!");
 
             factoryCleanup(done);
           }
@@ -276,8 +363,8 @@ describe('Users Controller', function() {
         };
         var res = {
           redirect: function(redirectPath) {
-            expect(req.session.context.jwtToken).to.not.be.undefined;
-            expect(req.session.context.success).to.equal("Thanks for joining! We're glad to have you");
+            expect(req.session.context.meta.jwtToken).to.not.be.undefined;
+            expect(req.session.context.meta.success).to.equal("Thanks for joining! We're glad to have you");
             
             stub.restore();
             factoryCleanup(done);
@@ -294,15 +381,15 @@ describe('Users Controller', function() {
       request(app)
       .post('/api/recover_password')
       .end(function(err, res) {
-        expect(res.body.error).to.equal('Error recovering password');
+        expect(res.body.errors.error).to.equal('Error recovering password');
         done();
       });
     });
 
     it('should respond with an error when no user is provided', function(done) {
-      var req = {};
+      var req = { body: {} };
       var res = getResponseObject(function(data) {
-        expect(data.error).to.equal('Error recovering password');
+        expect(data.errors.error).to.equal('Error recovering password');
         done();
       });
 
@@ -311,10 +398,16 @@ describe('Users Controller', function() {
 
     it('should respond with an error when a bad email is provided', function(done) {
       var req = {
-        body: { email: 'foo.bar.bademail123124131@gmail.com' }
+        body: { data: { 
+          id: 123123123,
+          type: 'user',
+          attributes: {          
+            email: 'foo.bar.bademail123124131@gmail.com'
+          }
+        } }
       };
       var res = getResponseObject(function(data) {
-        expect(data.error).to.equal("Couldn't find an account associated with this email");
+        expect(data.errors.error).to.equal("Couldn't find an account associated with this email");
         done();
       });
 
@@ -322,17 +415,30 @@ describe('Users Controller', function() {
     });
 
     it('should respond with a success message on completion', function(done) {
+      var stub = sinon.stub(mailer, 'sendMailAsync').resolves();
       this.timeout(5000);
 
       factory.create('user')
       .then(function(user) {
         var req = {
-          body: { email: user.get('email') }
+          body: { data: { 
+            id: 123123123,
+            type: 'user',
+            attributes: {          
+              email: user.get('email')
+            }
+          } }
         };
         var res = getResponseObject(function(data) {
-          expect(data.success).to.equal('Please check your email, a new password should be arriving shortly');
+          expect(data.meta.success).to.equal('Please check your email for further instructions');
           
-          factoryCleanup(done);
+          stub.restore();
+          PasswordReset.forge({userId: user.get('id')}).fetch().then(function(passReset) {
+            return passReset.destroy();
+          })
+          .then(function() {
+            factoryCleanup(done);
+          });
         });
 
         UsersController.recoverPassword(req, res);

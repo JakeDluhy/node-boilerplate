@@ -1,22 +1,39 @@
 var PATH_TO_ROOT = '../../..';
 
+/*
+  IMPORT PACKAGES
+*/
+var PATH_TO_ROOT = '../../..';
 var Promise = require('bluebird');
-
 var sinon = require('sinon');
 require('sinon-as-promised')(Promise);
-
 var factory = require('factory-girl').promisify(Promise);
 require('factory-girl-bookshelf')();
-require('../factories/user');
-
-var User = require(PATH_TO_ROOT+'/app/models/user');
-var UserConstants = require(PATH_TO_ROOT+'/app/constants/user');
-var VerificationMailer = require(PATH_TO_ROOT+'/app/mailers/verification-mailer');
-var rootUrl = require(PATH_TO_ROOT+'/config/environments/'+process.env.NODE_ENV).rootUrl;
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
 
+/*
+  IMPORT TEST HELPERS
+*/
 var assert = require('chai').assert;
 var expect = require('chai').expect;
+
+/*
+  ENVIRONMENT CONFIG
+*/
+var rootUrl = require(PATH_TO_ROOT+'/config/environments/'+process.env.NODE_ENV).rootUrl;
+
+/*
+  EXTERNAL MODULES
+*/
+var UserConstants = require(PATH_TO_ROOT+'/app/constants/user');
+var VerificationMailer = require(PATH_TO_ROOT+'/app/mailers/verification-mailer');
+require('../factories/user');
+
+/*
+  MODELS
+*/
+var User = require(PATH_TO_ROOT+'/app/models/user');
+
 
 function factoryCleanup(done) {
   factory.cleanup()
@@ -111,7 +128,7 @@ describe('User Model', function() {
   describe('user checkVerification', function() {
     it('should set the user active attribute to verified on completion', function(done) {
       var stub = sinon.stub(User, 'hashVerificationKey').resolves();
-      var stub2 = sinon.stub(bcrypt, 'compareAsync').resolves();
+      var stub2 = sinon.stub(bcrypt, 'compareAsync').resolves(true);
       factory.build('user')
       .then(function(user) {
         expect(user.get('active')).to.not.equal(UserConstants.USER_VERIFIED);

@@ -1,13 +1,24 @@
+/*
+  IMPORT PACKAGES
+*/
 var Promise = require('bluebird');
-// var request = Promise.promisifyAll(require('request'));
 var request = require('request');
 var md5 = require('md5');
-var apiKey = require('./environments/' + process.env.NODE_ENV).mailchimp.apiKey;
-var apiRoot = require('./environments/' + process.env.NODE_ENV).mailchimp.apiRoot;
-var mailingListId = require('./environments/' + process.env.NODE_ENV).mailchimp.mailingListId;
-var signupPathCategory = require('./environments/' + process.env.NODE_ENV).mailchimp.signupPathCategory;
 
+/*
+  ENVIRONMENT CONFIG
+*/
+var mailchimp = require('./environments/' + process.env.NODE_ENV).mailchimp;
+var apiKey = mailchimp.apiKey;
+var apiRoot = mailchimp.apiRoot;
+var mailingListId = mailchimp.mailingListId;
+var signupPathCategory = mailchimp.signupPathCategory;
+
+/*
+  Mailchimp class
+*/
 var Mailchimp = {
+  // Mailchimp default options
   defaultOptions: {
     host: apiRoot,
     headers: {
@@ -15,6 +26,17 @@ var Mailchimp = {
     }
   },
 
+  /*
+    @method sendReq
+    Default method to send a request to the mailchimp api
+
+    @param {string} requestPath - the api path to send the request to
+    @param {string} requestMethod - the http request method (GET, PUT, POST, DELETE)
+    @param{optional} {object} requestData - the data to include with the request
+
+    @returns {promise} resolves to the body of the response
+                       rejected with the error message of a bad request
+  */
   sendReq: Promise.method(function(requestPath, requestMethod, requestData) {
     request({
       url: apiRoot + requestPath,
@@ -33,6 +55,17 @@ var Mailchimp = {
     });
   }),
 
+  /*
+    @method addUserToList
+    Add a user to the mailing list specified in the environment file
+
+    @param {string} email - the email of the mailing list subscriber
+    @param {string} groupCategory - the category to designate the user as (ex. registeredUser or mailingList)
+    @param{optional} {string} firstName - the first name of the user
+    @param{optional} {string} lastName - the last name of the user
+
+    @returns {promise} that will always resolve to the sendReq method
+  */
   addUserToList: Promise.method(function(email, groupCategory, firstName, lastName) {
     var formData = {
       "email_address": email, 
@@ -46,15 +79,32 @@ var Mailchimp = {
     return this.sendReq('lists/'+mailingListId+'/members/', 'POST', formData);
   }),
 
+  /*
+    @method removeUserFromList
+    Remove a user from the mailing list
+
+    @param {string} email - the email of the mailing list subscriber
+
+    @returns {promise} that will always resolve to the sendReq method
+  */
+  removeUserFromList: Promise.method(function(email) {
+    var hashedEmail = md5(email.toLowerCase());
+
+    return this.sendReq('lists/'+mailingListId+'/members/'+hashedEmail, 'DELETE');
+  }),
+
+  /*
+    @method removeUserFromList
+    Get a users subscription
+
+    @param {string} email - the email of the mailing list subscriber
+
+    @returns {promise} that will always resolve to the sendReq method
+  */
   getUserSubscription: Promise.method(function(email) {
-    var hashedEmail = md5.digest(email.toLowerCase());
-    return this.sendReq('lists/'+mailingListId+'/members/'+hashedEmail, 'GET')
-    .then(function(data) {
-      console.log(data);
-    })
-    .catch(function(e) {
-      console.log(e);
-    });
+    var hashedEmail = md5(email.toLowerCase());
+    
+    return this.sendReq('lists/'+mailingListId+'/members/'+hashedEmail, 'GET');
   })
 }
 

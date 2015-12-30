@@ -43,6 +43,7 @@
     "lodash": "^3.10.1",
     "material-ui": "^0.10.1",
     "md5": "^2.0.0",
+    "moment": "^2.10.6",
     "nodemailer": "^1.4.0",
     "object-assign": "^3.0.0",
     "passport": "^0.2.2",

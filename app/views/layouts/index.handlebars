@@ -19,21 +19,21 @@
     </script>
   </head>
   <body>
-    {{#if jwtToken}}
+    {{#if meta.jwtToken}}
     <script type="text/javascript">
-      localStorage.setItem('jwt', "{{jwtToken}}")
+      sessionStorage.setItem('jwt', "{{meta.jwtToken}}")
     </script>
     {{/if}}
 
-    {{#if success}}
+    {{#if meta.success}}
       <script type="text/javascript">
-      var Message = ['success', "{{{success}}}"];
+      var Message = ['success', "{{{meta.success}}}"];
       </script>
     {{/if}}
 
-    {{#if error}}
+    {{#if errors.error}}
       <script type="text/javascript">
-      var Message = ['error', "{{{error}}}"];
+      var Message = ['error', "{{{errors.error}}}"];
       </script>
     {{/if}}
     

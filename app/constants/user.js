@@ -1,3 +1,6 @@
+/*
+  Export user constant values
+*/
 module.exports = {
   USER_UNVERIFIED: 0,
   USER_VERIFIED: 1,

@@ -1,9 +1,19 @@
 var PATH_TO_ROOT = '../../..';
 
+/*
+  IMPORT PACKAGES
+*/
 var factory = require('factory-girl');
 require('factory-girl-bookshelf')();
+
+/*
+  MODELS
+*/
 var User = require(PATH_TO_ROOT+'/app/models/user');
 
+/*
+  USER FACTORY
+*/
 module.exports = {
   mainUser: factory.define('user', User, {
     firstName: factory.sequence(function(n) {

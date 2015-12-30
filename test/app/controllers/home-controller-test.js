@@ -32,6 +32,7 @@ function createJwtToken() {
 
 function getResponseObject(cb) {
   return {
+    status: function() { return this; },
     json: cb
   }
 }
@@ -158,7 +159,7 @@ describe('Home Controller', function() {
           password: 'foobarchoo'
         })
         .end(function(err, res) {
-          expect(res.body.token).to.not.be.undefined;
+          expect(res.body.meta.token).to.not.be.undefined;
 
           factoryCleanup(done);
         });
@@ -171,7 +172,7 @@ describe('Home Controller', function() {
       request(app)
       .post('/api/register')
       .end(function(err, res) {
-        expect(res.body.error).to.equal('Error registering an account');
+        expect(res.body.errors.error).to.equal('Error registering an account');
         done();
       });
     });
@@ -179,7 +180,7 @@ describe('Home Controller', function() {
     it('should respond with an error if no user is provided', function(done) {
       var req = {};
       var res = getResponseObject(function(data) {
-        expect(data.error).to.equal('Error registering an account');
+        expect(data.errors.error).to.equal('Error registering an account');
         done();
       });
 
@@ -188,9 +189,10 @@ describe('Home Controller', function() {
 
     it('should respond with a success message on completion', function(done) {
       var stub = sinon.stub(User, 'register').resolves({});
-      var req = {body: {user: {}}};
+      var req = { body: { data: { attributes: { } } } };
       var res = getResponseObject(function(data) {
-        expect(data.success).to.equal("Congrats, you're in! Just verify your email and you're good to go!");
+        console.log(data);
+        expect(data.meta.success).to.equal("Congrats, you're in! Once you verify your email you'll be good to go!");
         User.register.restore();
         done();
       });
@@ -204,7 +206,7 @@ describe('Home Controller', function() {
       request(app)
       .post('/api/mailing_list')
       .end(function(err, res) {
-        expect(res.body.error).to.equal('Error signing up for the mailing list');
+        expect(res.body.errors.error).to.equal('Error signing up for the mailing list');
         done();
       });
     });
@@ -212,7 +214,7 @@ describe('Home Controller', function() {
     it('should respond with an error if no email is provided', function(done) {
       var req = {};
       var res = getResponseObject(function(data) {
-        expect(data.error).to.equal('Error signing up for the mailing list');
+        expect(data.errors.error).to.equal('Error signing up for the mailing list');
         done();
       });
 
@@ -221,9 +223,10 @@ describe('Home Controller', function() {
 
     it('should respond with a success message on completion', function(done) {
       var stub = sinon.stub(User, 'registerForMailingList').resolves({});
-      var req = {body: {email: 'foo.bar@test.com'}};
+      var req = { body: { data: { attributes: { email: 'foo.bar@test.com' } } } };
       var res = getResponseObject(function(data) {
-        expect(data.success).to.equal("Congratulations! You're all signed up!");
+        console.log(data);
+        expect(data.meta.success).to.equal("Congratulations! You're all signed up!");
         User.registerForMailingList.restore();
         done();
       });
@@ -237,16 +240,15 @@ describe('Home Controller', function() {
       request(app)
       .post('/api/contact')
       .end(function(err, res) {
-        expect(res.body.error).to.equal('Error contacting us, please directly email '+env.nodemailer.username);
+        expect(res.body.errors.error).to.equal('Error contacting us, please directly email '+env.nodemailer.username);
         done();
       });
     });
 
     it('should respond with an error if no contact information is provided', function(done) {
       var req = {};
-      console.log(!req.body);
       var res = getResponseObject(function(data) {
-        expect(data.error).to.equal('Error contacting us, please directly email '+ env.nodemailer.username);
+        expect(data.errors.error).to.equal('Error contacting us, please directly email '+ env.nodemailer.username);
         done();
       });
 
@@ -260,14 +262,17 @@ describe('Home Controller', function() {
         fromEmail: 'foo.bar@test.com',
         content: 'I found a bug!'
       }).resolves();
-      var req = {body: {
-        contact: {
+
+      var req = { body: { data: {
+        type: 'contact',
+        attributes: {
           name: 'foobar',
           contactType: 'bug',
-          email: 'foo.bar@test.com',
+          fromEmail: 'foo.bar@test.com',
           content: 'I found a bug!'
         }
-      }};
+      } } };
+
       var res = getResponseObject(function(data) {
         ContactMailer.sendContactForm.restore();
         done();
@@ -278,9 +283,9 @@ describe('Home Controller', function() {
 
     it('should respond with a success message on completion', function(done) {
       var stub = sinon.stub(ContactMailer, 'sendContactForm').resolves();
-      var req = {body: {contact: {}}};
+      var req = { body: { data: { attributes: {} } } };
       var res = getResponseObject(function(data) {
-        expect(data.success).to.equal("Got it - We'll get back to you soon!");
+        expect(data.meta.success).to.equal("Got it - We'll get back to you soon!");
         ContactMailer.sendContactForm.restore();
         done();
       });

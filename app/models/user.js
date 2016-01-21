@@ -65,7 +65,7 @@ var User = BaseModel.extend({
   checkMailingListSignup: function(user, resp) {
     var mailingListType = (user.get('password') === undefined ? 'mailingList' : 'registeredUser');
 
-    if(user.get('mailingList') === 'true' && (user.previousAttributes().mailingList === false || user.isNew())) {
+    if(user.get('mailingList') === true && (user.previousAttributes().mailingList === false || user.isNew())) {
       return user.addUserToMailingList(mailingListType);
     } else if(user.get('mailingList') === 'false' && user.previousAttributes().mailingList === true) {
       return user.removeUserFromMailingList();
@@ -96,7 +96,6 @@ var User = BaseModel.extend({
     *Note that the method __should__ always resolve, even if the passwords don't match. It resolves to a true/false value
   */
   verifyPassword: Promise.method(function(password) {
-    console.log(this.get('password'));
     return bcrypt.compareAsync(password, this.get('password'));
   }),
 
@@ -314,11 +313,12 @@ var User = BaseModel.extend({
       attrs.password = hashedPass;
       return User.forge({email: attrs.email.toLowerCase().trim()}).fetch().then(function(user) {
         if(user !== null && user.get('password') === null) {
+          var mailingList = (attrs.mailingList === 'true' ? true : false);
           // user is coming from the mailing list, so assign the details to the existing user and save
           user.set({password: hashedPass,
                     firstName: attrs.firstName,
                     lastName: attrs.lastName,
-                    mailingList: attrs.mailingList });
+                    mailingList: mailingList });
         } else {
           // otherwise create new user and save. If the email already exists Checkit will discover and raise an error
           user = User.forge(attrs);
@@ -359,7 +359,6 @@ var User = BaseModel.extend({
       email: email,
       mailingList: true
     };
-    console.log(attrs);
     return User.forge(attrs).save();
   }),
 

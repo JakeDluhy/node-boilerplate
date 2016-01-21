@@ -1,8 +1,14 @@
 var PATH_TO_ROOT = '../../..';
 
-var UserConstants = require(PATH_TO_ROOT+'/app/constants/user');
-
+/*
+  IMPORT TEST HELPERS
+*/
 var assert = require('chai').assert;
+
+/*
+  CONSTANTS
+*/
+var UserConstants = require(PATH_TO_ROOT+'/app/constants/user');
 
 describe('User Constants', function() {
   it('should include all of the activation values', function () {

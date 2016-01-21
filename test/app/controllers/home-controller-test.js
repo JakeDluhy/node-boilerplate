@@ -1,24 +1,45 @@
 var PATH_TO_ROOT = '../../..';
 
-var app = require(PATH_TO_ROOT+'/config/setup-app');
-var env = require(PATH_TO_ROOT+'/config/environments/' + process.env.NODE_ENV);
-var HomeController = require(PATH_TO_ROOT+'/app/controllers/home');
-var User = require('../../../app/models/user');
-var ContactMailer = require(PATH_TO_ROOT+'/app/mailers/contact-mailer');
-
+/*
+  IMPORT PACKAGES
+*/
 var Promise = require('bluebird');
-
 var sinon = require('sinon');
 require('sinon-as-promised')(Promise);
-
 var factory = require('factory-girl').promisify(Promise);
 require('factory-girl-bookshelf')();
-require('../factories/user');
-
-var assert = require('chai').assert;
-var expect = require('chai').expect;
 var request = require('supertest');
 var jwt = require('jsonwebtoken');
+
+/*
+  IMPORT TEST HELPERS
+*/
+var assert = require('chai').assert;
+var expect = require('chai').expect;
+
+/*
+  ENVIRONMENT CONFIG
+*/
+var env = require(PATH_TO_ROOT+'/config/environments/' + process.env.NODE_ENV);
+
+/*
+  EXTERNAL MODULES
+*/
+var app = require(PATH_TO_ROOT+'/config/setup-app');
+require('../factories/user');
+var ContactMailer = require(PATH_TO_ROOT+'/app/mailers/contact-mailer');
+
+/*
+  MODELS
+*/
+var User = require('../../../app/models/user');
+
+/*
+  CONTROLLERS
+*/
+var HomeController = require(PATH_TO_ROOT+'/app/controllers/home');
+
+
 
 function createJwtToken() {
   var user = {
@@ -107,8 +128,8 @@ describe('Home Controller', function() {
         password: 'mypassword'
       })
       .end(function(err, res) {
-        expect(res.body.errorType).to.equal('notFoundError');
-        expect(res.body.error).to.equal('No account exists with this email');
+        expect(res.body.errors.errorType).to.equal('notFoundError');
+        expect(res.body.errors.error).to.equal('No account exists with this email');
         done();
       });
     });
@@ -123,8 +144,8 @@ describe('Home Controller', function() {
           password: 'wrongpassword'
         })
         .end(function(err, res) {
-          expect(res.body.errorType).to.equal('invalidPasswordError');
-          expect(res.body.error).to.equal('Invalid Password');
+          expect(res.body.errors.errorType).to.equal('invalidPasswordError');
+          expect(res.body.errors.error).to.equal('Invalid Password');
 
           factoryCleanup(done);
         });
@@ -141,8 +162,8 @@ describe('Home Controller', function() {
           password: user.get('password')
         })
         .end(function(err, res) {
-          expect(res.body.errorType).to.equal('notVerifiedError');
-          expect(res.body.error).to.equal('Your account is not verified. Please check your email');
+          expect(res.body.errors.errorType).to.equal('notVerifiedError');
+          expect(res.body.errors.error).to.equal('Your account is not verified. Please check your email');
 
           factoryCleanup(done);
         });

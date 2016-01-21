@@ -35,7 +35,7 @@ module.exports = {
 
     @responds with {
                       data: {
-                        type: 'users',
+                        type: 'user',
                         id: {number},
                         attributes: {object}
                       }
@@ -49,7 +49,7 @@ module.exports = {
     User.forge({id: req.params.id}).fetch({require: true}).tap(function(user) {
       res.status(200).json({
         data: {
-          type: 'users',
+          type: 'user',
           id: user.id,
           attributes: _.pick(user, 'firstName', 'lastName')
         }
@@ -68,7 +68,7 @@ module.exports = {
 
     @responds with {
                       data: {
-                        type: 'users',
+                        type: 'user',
                         id: {number},
                         attributes: {object}
                       }
@@ -100,7 +100,7 @@ module.exports = {
     @param {object} request body - will contain the user to update
     {
       data: {
-        type: 'users',
+        type: 'user',
         id: {number},
         attributes: {object}
       }
@@ -141,7 +141,7 @@ module.exports = {
     @param {object} request.body - will contain the user passwords
     {
       data: {
-        type: 'users',
+        type: 'user',
         id: {number},
         attributes: {
           oldPassword: {string},
@@ -204,7 +204,6 @@ module.exports = {
     req.session.context = { errors: {error: The error message} }
   */
   verifyUser: function(req, res) {
-    // Include a query param in the redirect so that frontend knows what message to show?
     User.forge({id: req.params.id}).fetch({require: true}).tap(function(user) {
       user.checkVerification(req.query.verification)
       .then(function() {
@@ -241,7 +240,7 @@ module.exports = {
     @params {object} request.body - will contain the user email
     {
       data: {
-        type: 'users',
+        type: 'user',
         id: {number},
         attributes: {
           email: {string},

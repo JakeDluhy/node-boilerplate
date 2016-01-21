@@ -1,10 +1,20 @@
 var PATH_TO_ROOT = '../../..';
 
-var MailerConstants = require(PATH_TO_ROOT+'/app/constants/mailers');
+/*
+  IMPORT TEST HELPERS
+*/
+var assert = require('chai').assert;
+
+/*
+  ENVIRONMENT CONFIG
+*/
 var rootUrl = require(PATH_TO_ROOT+'/config/environments/test').rootUrl;
 var companyName = require(PATH_TO_ROOT+'/config/environments/test').companyName;
 
-var assert = require('chai').assert;
+/*
+  CONSTANTS
+*/
+var MailerConstants = require(PATH_TO_ROOT+'/app/constants/mailers');
 
 describe('Mailer Constants', function() {
   it('should include the company name', function () {

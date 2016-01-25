@@ -50,7 +50,8 @@ module.exports = {
     }
     redis.get(redisKey)
     .then(function(rawString) {
-      console.log('here');
+      console.log(rawString);
+      console.log(privateMethods.processIndex(rawString));
       res.send(privateMethods.processIndex(rawString));
     })
     .catch(function(err) {

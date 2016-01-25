@@ -49,8 +49,5 @@ module.exports = {
     password: 'cutekittensarecute'
   },
   feedbackEmail: 'warscribe.feedback@gmail.com',
-  contactEmail: 'warscribe.contact@gmail.com',
-  googleAnalytics: {
-    trackingID: 'UA-67296627-1'
-  }
+  contactEmail: 'warscribe.contact@gmail.com'
 }

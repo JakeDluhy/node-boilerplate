@@ -56,10 +56,14 @@ app.set('view engine', 'handlebars');
 // Static file path
 app.use(express.static(__dirname + '/../public'));
 // Session with secret key
-app.use(session({secret: sessionSecret}));
+app.use(session({
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: true
+}));
 // Specify necessary body parser methods
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({extended: true}));
 // Init passport
 app.use(passport.initialize());
 

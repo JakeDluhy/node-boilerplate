@@ -24,8 +24,5 @@ module.exports = {
     password: 'myGmailPassword'
   },
   feedbackEmail: 'myFeedbackEmail',
-  contactEmail: 'myContactEmail',
-  googleAnalytics: {
-    trackingID: ''
-  }
+  contactEmail: 'myContactEmail'
 }

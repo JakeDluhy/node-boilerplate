@@ -50,8 +50,6 @@ module.exports = {
     }
     redis.get(redisKey)
     .then(function(rawString) {
-      console.log(rawString);
-      console.log(privateMethods.processIndex(rawString));
       res.send(privateMethods.processIndex(rawString));
     })
     .catch(function(err) {
@@ -210,6 +208,8 @@ var privateMethods = {
   processIndex: function(rawString) {
     if(process.env.NODE_ENV === 'development') {
       return rawString.replace(/assets/g, 'http://localhost:4200/assets');
+    } else if(process.env.NODE_ENV === 'production') {
+      return rawString;
     }
   }
 }

@@ -11,6 +11,7 @@ var _ = require('lodash');
 var env = require('../../config/environments/' + process.env.NODE_ENV);
 var contactEmail = env.nodemailer.username;
 var jwtSecret = env.jwtSecret;
+var redisPrefix = env.redisPrefix;
 
 /*
   EXTERNAL MODULES
@@ -39,20 +40,22 @@ module.exports = {
     var redisKey = '';
     // Allow passage of a specific version
     if(req.query.revision) {
-      redisKey = 'ember-boilerplate:index:'+req.query.revision;
+      redisKey = redisPrefix+req.query.revision;
     // If development, use the default
     } else if(process.env.NODE_ENV === 'development') {
-      redisKey = 'ember-boilerplate:index:default';
+      redisKey = redisPrefix+'default';
     // In production, use the active version
     } else {
-      redisKey = 'ember-boilerplate:index:current-content';
+      redisKey = redisPrefix+'current-content';
     }
     console.log(redisKey);
     redis.get(redisKey)
     .then(function(rawString) {
+      console.log('here');
       res.send(privateMethods.processIndex(rawString));
     })
     .catch(function(err) {
+      res.send('error');
       console.log(err);
     });
   },
@@ -175,7 +178,6 @@ module.exports = {
                     }
   */
   sendContactForm: function(req, res) {
-    console.log(req.body);
     if(!req.body || !req.body.data || !req.body.data.attributes) {
       console.log('Contact information not provided with contact request');
       return res.status(400).json({ errors: {error: 'Error contacting us, please directly email ' + contactEmail} });

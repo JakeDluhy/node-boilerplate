@@ -19,6 +19,7 @@ module.exports = {
     port: 6379,
     host: 'myRedisClusterEndpoint'
   },
+  redisPrefix: 'ember-boilerplate:index:',
   // jwtSecret: 'mysecrethere',
   // sessionSecret: 'mysecrethere',
   // mailchimp: {

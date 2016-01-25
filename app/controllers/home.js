@@ -48,19 +48,14 @@ module.exports = {
     } else {
       redisKey = redisPrefix+'current-content';
     }
-    console.log(redis);
-    console.log(redis.get);
     redis.get(redisKey)
     .then(function(rawString) {
       console.log('here');
       res.send(privateMethods.processIndex(rawString));
     })
     .catch(function(err) {
-      console.log(err);
       res.send('error');
     });
-    console.log('here2');
-    res.send('sucks to suck');
   },
 
   /*

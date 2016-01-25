@@ -17,7 +17,7 @@ module.exports = {
   },
   redis: {
     port: 6379,
-    host: 'myRedisClusterEndpoint'
+    host: 'my-replication-001.ymxtu8.0001.usw2.cache.amazonaws.com'
   },
   redisPrefix: 'ember-boilerplate:index:',
   // jwtSecret: 'mysecrethere',

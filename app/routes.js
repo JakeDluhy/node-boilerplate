@@ -1,9 +1,22 @@
+/*
+  IMPORT PACKAGES
+*/
 var express = require('express');
-
-var passport = require('../config/strategies');
 var expressJwt = require('express-jwt');
+
+/*
+  ENVIRONMENT CONFIG
+*/
 var env = require('../config/environments/' + process.env.NODE_ENV);
 
+/*
+  EXTERNAL MODULES
+*/
+var passport = require('../config/strategies');
+
+/*
+  CONTROLLERS
+*/
 var home = require('./controllers/home');
 var users = require('./controllers/users');
 

@@ -127,20 +127,18 @@ describe('User Model', function() {
 
   describe('user checkVerification', function() {
     it('should set the user active attribute to verified on completion', function(done) {
-      var stub = sinon.stub(User, 'hashVerificationKey').resolves();
-      var stub2 = sinon.stub(bcrypt, 'compareAsync').resolves(true);
       factory.build('user')
       .then(function(user) {
         expect(user.get('active')).to.not.equal(UserConstants.USER_VERIFIED);
-        user.checkVerification()
-        .then(function(user2) {
-          expect(user2.get('active')).to.equal(UserConstants.USER_VERIFIED);
-
-          stub.restore();
-          stub2.restore();
-          done();
-        })
-      })
+        User.hashVerificationKey(user.get('email'))
+        .then(function(hashedKey) {
+          user.checkVerification(hashedKey)
+          .then(function(user2) {
+            expect(user2.get('active')).to.equal(UserConstants.USER_VERIFIED);
+            done();
+          });
+        });
+      });
     });
   });
 
@@ -254,7 +252,7 @@ describe('User Model', function() {
 
         User.register(attrs)
         .catch(function(err) {
-          expect(err.message).to.equal('email must be unique. ' +user.get('email')+ ' already exists.');
+          expect(err.message).to.equal('Email must be unique. ' +user.get('email')+ ' already exists.');
 
           User.hashPassword.restore();
           factoryCleanup(done);

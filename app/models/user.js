@@ -201,16 +201,14 @@ var User = BaseModel.extend({
   */
   checkVerification: Promise.method(function(hashParam) {
     var self = this;
-    return User.hashVerificationKey(this.get('email'))
-    .then(function(verificationHash) {
-      return bcrypt.compareAsync(verificationHash, hashParam)
-      .then(function(hashMatch) {
-        if(hashMatch) {
-          return self.save({active: UserConstants.USER_VERIFIED});  
-        } else {
-          throw new Error('Verification hash does not match');
-        }
-      });
+    var unhashed = 'secret' + this.get('email') + 'supersecret';
+    return bcrypt.compareAsync(unhashed, hashParam)
+    .then(function(match) {
+      if(match) {
+        return self.save({active: UserConstants.USER_VERIFIED});  
+      } else {
+        throw new Error('Verification hash does not match');
+      }
     });
   })
 
@@ -334,7 +332,7 @@ var User = BaseModel.extend({
     .catch(Checkit.Error, function(err) {
       if(err.get('email')) {
         // Checkit email error
-        throw new Error(err.get('email').message);
+        throw new Error(_.capitalize(err.get('email').message));
       } else {
         // Database error
         console.log(err);

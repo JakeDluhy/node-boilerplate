@@ -8,6 +8,10 @@ module.exports = {
     password: 'AWS Password',
     database: 'postgres'
   },
+  redis: {
+    port: 6379,
+    host: 'myRedisClusterEndpoint'
+  },
   jwtSecret: 'mysecrethere',
   sessionSecret: 'mysecrethere',
   mailchimp: {

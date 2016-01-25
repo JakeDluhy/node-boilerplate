@@ -34,6 +34,7 @@
     "express-jwt": "^3.0.1",
     "express-session": "^1.11.3",
     "handlebars": "^3.0.3",
+    "ioredis": "^1.14.0",
     "jsonwebtoken": "^5.0.5",
     "jwt-decode": "^1.4.0",
     "knex": "^0.8.6",
@@ -46,7 +47,7 @@
     "passport": "^0.2.2",
     "passport-local": "^1.0.0",
     "pg": "^4.4.1",
-    "request": "^2.61.0",
+    "request": "^2.61.0"
   },
   "devDependencies": {
     "babel": "^5.8.29",

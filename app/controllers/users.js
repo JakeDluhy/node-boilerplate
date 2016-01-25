@@ -205,6 +205,7 @@ module.exports = {
   */
   verifyUser: function(req, res) {
     User.forge({id: req.params.id}).fetch({require: true}).tap(function(user) {
+      console.log(req.query.verification);
       user.checkVerification(req.query.verification)
       .then(function() {
         var token = jwt.sign(user, jwtSecret);

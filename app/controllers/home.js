@@ -17,6 +17,7 @@ var jwtSecret = env.jwtSecret;
 */
 var ContactMailer = require('../mailers/contact-mailer');
 var Checkit = require('../../config/checkit');
+var redis = require('../../config/redis');
 
 /*
   MODELS
@@ -35,9 +36,13 @@ module.exports = {
         this allows the app to send data with the index template
   */
   index: function(req, res) {
-    var context = (req.session.context === undefined ? {} : req.session.context);
-    res.render('layouts/index', context);
-    req.session.context = undefined;
+    redis.get('ember-boilerplate:index:default')
+    .then(function(rawString) {
+      res.send(privateMethods.processIndex(rawString));
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
   },
 
   /*
@@ -158,6 +163,7 @@ module.exports = {
                     }
   */
   sendContactForm: function(req, res) {
+    console.log(req.body);
     if(!req.body || !req.body.data || !req.body.data.attributes) {
       console.log('Contact information not provided with contact request');
       return res.status(400).json({ errors: {error: 'Error contacting us, please directly email ' + contactEmail} });
@@ -186,5 +192,11 @@ var privateMethods = {
   */
   _permittedRegisterParams: function(attrs) {
     return _.pick(attrs, 'firstName', 'lastName', 'email', 'password', 'mailingList');
+  },
+
+  processIndex: function(rawString) {
+    if(process.env.NODE_ENV === 'development') {
+      return rawString.replace(/assets/g, 'http://localhost:4200/assets');
+    }
   }
 }

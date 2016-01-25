@@ -9,7 +9,7 @@ module.exports = {
   //   database: 'postgres'
   // },
   database: {
-    host: 'postgres.cslfhpxvmgcn.us-west-2.rds.amazonaws.com',
+    host: 'postgres.cs1fhpxvmgcn.us-west-2.rds.amazonaws.com',
     port: '5432',
     user: 'jakedluhy',
     password: 'cutekittensarecute',

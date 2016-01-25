@@ -36,7 +36,19 @@ module.exports = {
         this allows the app to send data with the index template
   */
   index: function(req, res) {
-    redis.get('ember-boilerplate:index:default')
+    var redisKey = '';
+    // Allow passage of a specific version
+    if(req.query.revision) {
+      redisKey = 'ember-boilerplate:index:'+req.query.revision;
+    // If development, use the default
+    } else if(process.env.NODE_ENV === 'development') {
+      redisKey = 'ember-boilerplate:index:default';
+    // In production, use the active version
+    } else {
+      redisKey = 'ember-boilerplate:index:current-content';
+    }
+    console.log(redisKey);
+    redis.get(redisKey)
     .then(function(rawString) {
       res.send(privateMethods.processIndex(rawString));
     })

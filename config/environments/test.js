@@ -1,33 +1,33 @@
 module.exports = {
-  companyName: 'My Company',
+  companyName: 'MY COMPANY NAME',
   rootUrl: 'http://localhost:3300',
   database: {
     host: '127.0.0.1',
-    user: 'jake',//username
+    user: 'MY USERNAME',//username
     password: '',
-    database: 'warscribe_test_db'//my_test_db
+    database: 'MY TEST DB NAME'//my_test_db
   },
   redis: {
     port: 6379,
     host: '127.0.0.1'
   },
-  redisPrefix: 'ember-boilerplate:index:',
-  jwtSecret: 'mysecrethere',
-  sessionSecret: 'mysecrethere',
+  redisPrefix: '{EMBER APP NAME}:index:',
+  jwtSecret: 'SECRET STRING',
+  sessionSecret: 'SECRET STRING',
   mailchimp: {
-    apiKey: '',
+    apiKey: 'MAILCHIMP API KEY',
     apiRoot: 'https://us11.api.mailchimp.com/3.0/',
-    mailingListId: '',
+    mailingListId: 'MAILCHIMP MAILING LIST ID',
     signupPathCategory: {
-      categoryId: '',
-      registeredUserId: '',
-      mailingListId: ''
+      categoryId: 'MAILCHIMP INTEREST GROUP ID',
+      registeredUserId: 'MAILCHIMP GROUP ID',
+      mailingListId: 'MAILCHIMP GROUP ID'
     }
   },
   nodemailer: {
-    username: 'myGmailAccount',
-    password: 'myGmailPassword'
+    username: 'GMAIL ACCOUNT USERNAME',
+    password: 'GMAIL ACCOUNT PASSWORD'
   },
-  feedbackEmail: 'myFeedbackEmail',
-  contactEmail: 'myContactEmail'
+  feedbackEmail: 'FEEDBACK EMAIL ACCOUNT',
+  contactEmail: 'CONTACT EMAIL ACCOUNT'
 }

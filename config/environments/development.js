@@ -1,54 +1,33 @@
 module.exports = {
-  companyName: 'My Company',
+  companyName: 'MY COMPANY NAME',
   rootUrl: 'http://localhost:4200',
   database: {
     host: '127.0.0.1',
-    user: 'jake',
+    user: 'MY USERNAME',
     password: '',
-    database: 'my_db'
+    database: 'MY DB NAME'
   },
   redis: {
     port: 6379,
     host: '127.0.0.1'
   },
-  redisPrefix: 'ember-boilerplate:index:',
-  // jwtSecret: 'mysecrethere',
-  // sessionSecret: 'mysecrethere',
-  // mailchimp: {
-  //   apiKey: '',
-  //   apiRoot: 'https://us11.api.mailchimp.com/3.0/',
-  //   mailingListId: '',
-  //   signupPathCategory: {
-  //     categoryId: '',
-  //     registeredUserId: '',
-  //     mailingListId: ''
-  //   }
-  // },
-  // nodemailer: {
-  //   username: '',
-  //   password: ''
-  // },
-  // feedbackEmail: 'myFeedbackEmail',
-  // contactEmail: 'myContactEmail',
-  // googleAnalytics: {
-  //   trackingID: ''
-  // }
-  jwtSecret: 'mysecrethere',
-  sessionSecret: 'mysecrethere',
+  redisPrefix: '{EMBER APP NAME}:index:',
+  jwtSecret: 'SECRET STRING',
+  sessionSecret: 'SECRET STRING',
   mailchimp: {
-    apiKey: '8eeafe0cb2c34e83b695faad724427e9-us11',
+    apiKey: 'MAILCHIMP API KEY',
     apiRoot: 'https://us11.api.mailchimp.com/3.0/',
-    mailingListId: '0f7da84c40',
+    mailingListId: 'MAILCHIMP MAILING LIST ID',
     signupPathCategory: {
-      categoryId: 'd2337ba10a',
-      registeredUserId: 'f6fdbeea6e',
-      mailingListId: '0ece627f4b'
+      categoryId: 'MAILCHIMP INTEREST GROUP ID',
+      registeredUserId: 'MAILCHIMP GROUP ID',
+      mailingListId: 'MAILCHIMP GROUP ID'
     }
   },
   nodemailer: {
-    username: 'warscribe.contact@gmail.com',
-    password: 'cutekittensarecute'
+    username: 'GMAIL ACCOUNT USERNAME',
+    password: 'GMAIL ACCOUNT PASSWORD'
   },
-  feedbackEmail: 'warscribe.feedback@gmail.com',
-  contactEmail: 'warscribe.contact@gmail.com'
+  feedbackEmail: 'FEEDBACK EMAIL ACCOUNT',
+  contactEmail: 'CONTACT EMAIL ACCOUNT'
 }

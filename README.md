@@ -36,6 +36,8 @@ In order to provide config files for three different environments (development, 
 
 ## Setting up resources and deploying
 
+Set up the AWS resources for deployment to production
+
 ### Create a gmail account
 
 Start by creating a gmail account (or use an existing one) that you will be able to use for AWS, nodemailer, mailchimp, etc... [Gmail Signup](https://accounts.google.com/SignUp?service=mail&continue=http%3A%2F%2Fmail.google.com%2Fmail%2F%3Fpc%3Dtopnav-about-en)

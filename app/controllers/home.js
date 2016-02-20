@@ -11,7 +11,8 @@ var _ = require('lodash');
 var env = require('../../config/environments/' + process.env.NODE_ENV);
 var contactEmail = env.nodemailer.username;
 var jwtSecret = env.jwtSecret;
-var redisPrefix = env.redisPrefix;
+// var redisPrefix = env.redisPrefix;
+var indexFileTableName = env.indexFileTableName;
 
 /*
   EXTERNAL MODULES
@@ -37,24 +38,54 @@ module.exports = {
         this allows the app to send data with the index template
   */
   index: function(req, res) {
-    var redisKey = '';
+    var revision = '';
     // Allow passage of a specific version
     if(req.query.revision) {
-      redisKey = redisPrefix+req.query.revision;
+      revision = req.query.revision;
     // If development, use the default
     } else if(process.env.NODE_ENV === 'development') {
-      redisKey = redisPrefix+'default';
+      revision = 'default';
     // In production, use the active version
     } else {
-      redisKey = redisPrefix+'current-content';
+      return knex.select('value').from(indexFileTableName).where({ key: 'current' })
+      .then(function(rows) {
+        return knex.select('value').from(indexFileTableName).where({ key: rows[0].value });
+      })
+      .then(function(rows) {
+        res.send(privateMethods.processIndex(rows[0].value));
+      })
+      .catch(function(err) {
+        res.send('error');
+      });
     }
-    redis.get(redisKey)
-    .then(function(rawString) {
-      res.send(privateMethods.processIndex(rawString));
+    knex.select('value').from(indexFileTableName).where({ key: revision })
+    .then(function(rows) {
+      res.send(privateMethods.processIndex(rows[0].value));
     })
     .catch(function(err) {
+      console.log(err);
       res.send('error');
     });
+
+    // For Redis
+    // var redisKey = '';
+    // // Allow passage of a specific version
+    // if(req.query.revision) {
+    //   redisKey = redisPrefix+req.query.revision;
+    // // If development, use the default
+    // } else if(process.env.NODE_ENV === 'development') {
+    //   redisKey = redisPrefix+'default';
+    // // In production, use the active version
+    // } else {
+    //   redisKey = redisPrefix+'current-content';
+    // }
+    // redis.get(redisKey)
+    // .then(function(rawString) {
+    //   res.send(privateMethods.processIndex(rawString));
+    // })
+    // .catch(function(err) {
+    //   res.send('error');
+    // });
   },
 
   /*

@@ -12,7 +12,8 @@ module.exports = {
     port: 6379,
     host: 'AWS REPLICATION GROUP ENDPOINT'
   },
-  redisPrefix: '{EMBER APP NAME}:index:',
+  // redisPrefix: '{EMBER APP NAME}:index:',
+  indexFileTableName: 'TABLE_NAME_FOR_INDEX_STORAGE', // By default based off ember app name, such as ember_boilerplate_bootstrap
   jwtSecret: 'SECRET STRING',
   sessionSecret: 'SECRET STRING',
   mailchimp: {

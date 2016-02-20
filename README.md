@@ -8,7 +8,7 @@ This is a boilerplate application for developing using Node.js, with Bookshelf a
 * Node ([https://nodejs.org/en/](https://nodejs.org/en/))
 * npm ([https://www.npmjs.com/](https://www.npmjs.com/))
 * postgres ([http://www.postgresql.org/](http://www.postgresql.org/))
-* redis ([http://redis.io/](http://redis.io/))
+* redis ([http://redis.io/](http://redis.io/)) (optional)
 
 ## Getting started
 
@@ -19,6 +19,11 @@ This is a boilerplate application for developing using Node.js, with Bookshelf a
 * Migrate the db `NODE_ENV='development' knex migrate:latest`
 * Start the server with `NODE_ENV='development' grunt server`
 
+## A Note on Redis
+I originally built this app using the lightning deploy method for ember, which deploys the index.html file to Redis. This is the preferred method, however I found out that Redis is not supported under the free tier for AWS. Therefore the option to use redis is still available (commented out). You'll want to modify package.json to keep ember-cli-deploy and ember-cli-deploy-ssh-tunnel, but all other deploy plugins can be replaced by the lightning pack.
+
+The alternative is to mimic the lightning deploy by deploying the index.html file to the postgres db, and reading the value from there. In all other respects it works very similarly, it is just a little less clean, and a little less fast. It is free though.
+
 ## <a name="modifyConfig"></a>Modifying config files
 
 In order to provide config files for three different environments (development, test, and production), there are three different files that should have identical keys in them. The values stored in those keys should reflect the desired configuration for that environment.
@@ -27,7 +32,8 @@ In order to provide config files for three different environments (development, 
 * For the local database, host should be `127.0.0.1`, user should correspond to your computer user, password can be empty, and database should match the name of the database created using `createdb`
 * For the test database, host should be `127.0.0.1`, user should correspond to your computer user, password can be empty, and database should match the name of the database created using `createdb`. You should create a separate db for testing
 * For the production database, this information will be filled in once you set up a DB on your AWS account
-* There should be no need to change anything for redis locally, but once you set up a cluster on AWS the redis endpoint will need to be added
+* There should be no need to change anything for redis locally, but once you set up a cluster on AWS the redis endpoint will need to be added (if using the redis option)
+* If not using redis, the indexFileTableName should be specified. The default is {frontend app name (underscored)}_bootstrap
 * jwtSecret and sessionSecret are secret strings to use for the jwtKey and express session
 * I like using mailchimp to manage an email list. In order to take advantage of this you will need to register a free [mailchimp account](https://login.mailchimp.com/signup?pid=GAW), generate an apiKey, and a mailing list with a specific ID. I also made it so that you can create different groups in your mailchimp list, to determine who signed up exclusively for the mailing list, and who registered as a full user
 * This app uses nodemailer with the gmail service. In order to configure this you simply need to sign up for a gmail account and set the email and password in the username and password fields
@@ -113,13 +119,13 @@ After it is created and ready, sign in to the console
 * Click Create Security Group
 * Give it a name and description, and click Create
 
-#### Create a redis elasticache cluster
+#### (Optional) Create a redis elasticache cluster
 
 [Amazon Docs](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/Clusters.Create.Redis.CON.html)
 * In the top left, click on Services > Elasticache
 * Click on Get Started Now
 * Choose Redis
-* Keep defaults for cluster specification
+* Choose your preferred option for the cluster specification. Note that redis is __not__ covered under the free tier for AWS
 * For Configuration, choose an appropriate name and description. The rest of the fields can be left as defaults
 
 #### Create an RDS instance
@@ -186,6 +192,7 @@ After it is created and ready, sign in to the console
 First, open up your config/environments/production.js file
 * Enter in your database host (make sure to strip port of the end), port, username (user), password, and the name of your database
 * Enter in your redis host (Endpoint) (strip port) and redisPrefix. The redisPrefix should be `{ember app name}:index:`
+* Enter your indexFileTableName
 * Enter in the mailchimp apiKey, mailingListId, categoryId, registeredUserId, and mailingListId
 * Enter in your gmail information for nodemailer
 * And fill in the other fields with the desired configuration (jwtSecret and sessionSecret can be any secret string)
@@ -196,11 +203,13 @@ Then, in your Ember App, be sure to fill in the necessary information for deploy
 * s3Bucket is the name of your S3 bucket that you created
 * s3Region is the name of the region your s3 is located in
 * cdnUrl is the prefix that will be prepended to static assets. One way to find this is to add a file to your s3 bucket, open it, and see the url that is listed before the asset. In general, it follows the form `https://s3-{s3 region}.amazonaws.com/{bucket name}/{app name}/`
+* Fill in your postgres information for dev and production. This is the poor man's version of the lightning deploy - using postgres as a key value store instead of redis.
 * tunnelConfig is used to ssh into the ec2 instance, and connect to redis from there to deploy index.html
   * username should be 'ec2-user'
   * host should be the elasticbeanstalk ec2 instance public IP address
   * privateKeyPath should be the path in your system to your private key to ssh into the ec2 instance
-  * dstHost should be the Endpoint for your elasticache redis instance
+  * dstHost should be the Endpoint for your RDS instance (if using the postgres deploy) or the Endpoint for your elasticache redis instance (if using redis)
+  * If using the postgres deploy, the port should be 5432, with redis remove this field
 
 ### Deploy the app!
 
